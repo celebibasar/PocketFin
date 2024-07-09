@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.basarcelebi.pocketfin" />
+                  <option name="mobileSdkAppId" value="1:595697009089:android:3a68f9f9ed2502a3796f40" />
+                  <option name="projectId" value="pocketfin-d8d8b" />
+                  <option name="projectNumber" value="595697009089" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
