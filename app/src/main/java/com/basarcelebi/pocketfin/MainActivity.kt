@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -22,13 +24,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.basarcelebi.pocketfin.database.IncomeExpenseItem
 import com.basarcelebi.pocketfin.database.PocketFinDatabase
+import com.basarcelebi.pocketfin.screen.ProfileScreen
 import com.basarcelebi.pocketfin.ui.theme.PocketFinTheme
 import com.basarcelebi.pocketfin.viewmodel.HomeScreenViewModel
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: PocketFinDatabase
@@ -48,7 +51,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PocketFinApp(database: PocketFinDatabase) {
     val navController = rememberNavController()
-
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -72,10 +74,10 @@ fun NavigationHost(
             HomeScreen(database, scope)
         }
         composable(Screen.AskToGemini.route) {
-            // Ekran içeriğini buraya yerleştir
+            ProfileScreen()
         }
         composable(Screen.Profile.route) {
-            // Ekran içeriğini buraya yerleştir
+            ProfileScreen()
         }
     }
 }
@@ -86,7 +88,13 @@ fun BottomNavigationBar(navController: NavHostController) {
         val items = listOf("home", "askToGemini", "profile")
         items.forEach { screen ->
             BottomNavigationItem(
-                icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                icon = {
+                    when (screen) {
+                        "home" -> Icon(Icons.Default.Home, contentDescription = "Home")
+                        // Add icons for other screens as needed
+                        else -> Icon(Icons.Default.Home, contentDescription = "Home")
+                    }
+                },
                 label = { Text(screen) },
                 selected = false, // Implement your own selection logic
                 onClick = {
@@ -100,7 +108,6 @@ fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
-
 @Composable
 fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
@@ -113,27 +120,31 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
     var showIncomeDialog by remember { mutableStateOf(false) }
     var showExpenseDialog by remember { mutableStateOf(false) }
 
-    // Gelir ve gider listelerini Room'dan LiveData olarak al
+    // Observe income and expense lists and total amount
     val incomeList by homeScreenViewModel.incomeList.observeAsState(emptyList())
     val expenseList by homeScreenViewModel.expenseList.observeAsState(emptyList())
     val totalAmountLiveData by homeScreenViewModel.totalAmount.observeAsState(0.0)
 
-    // Güncellenen totalAmount değerini kullan
-    LaunchedEffect(totalAmountLiveData) {
-        totalAmount = totalAmountLiveData
+    // Update totalAmount when totalAmountLiveData changes
+    LaunchedEffect(incomeList, expenseList) {
+        val activeIncomeAmount = incomeList.filter { it.isActive }.sumByDouble { it.amount!! }
+        val activeExpenseAmount = expenseList.filter { it.isActive }.sumByDouble { it.amount!! }
+        totalAmount = activeIncomeAmount - activeExpenseAmount
     }
 
-    // Veritabanından verileri almak için başlangıçta çalışan etki
+    // Fetch initial data from the database
     LaunchedEffect(Unit) {
         homeScreenViewModel.refreshLists()
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Gelirler bölümü
-        Text("Gelirler")
+        // Income section
+        Text("Incomes")
         incomeList.forEachIndexed { index, item ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -141,22 +152,35 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
             ) {
                 Checkbox(
                     checked = item.isActive,
-                    onCheckedChange = {
-                        item.isActive = it
-                        homeScreenViewModel.refreshLists()
+                    onCheckedChange = { isChecked ->
+                        val updatedItem = item.copy(isActive = isChecked)
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                database.incomeExpenseDao().updateIncomeItem(updatedItem)
+                            }
+                            homeScreenViewModel.refreshLists()
+                        }
                     }
                 )
+
+
                 Text("${item.description}: €${String.format("%.2f", item.amount)}")
+
+
             }
         }
-        Button(onClick = { showIncomeDialog = true }) {
-            Text("Gelir Ekle")
+
+        Button(
+            onClick = { showIncomeDialog = true },
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Text("Add Income")
         }
 
+        // Expenses section
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Giderler bölümü
-        Text("Giderler")
+        Text("Expenses")
         expenseList.forEachIndexed { index, item ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -164,25 +188,39 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
             ) {
                 Checkbox(
                     checked = item.isActive,
-                    onCheckedChange = {
-                        item.isActive = it
-                        homeScreenViewModel.refreshLists()
+                    onCheckedChange = { isChecked ->
+                        val updatedItem = item.copy(isActive = isChecked)
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                database.incomeExpenseDao().updateExpenseItem(updatedItem)
+                            }
+                            homeScreenViewModel.refreshLists()
+                        }
                     }
                 )
-                Text("${item.description}: -€${String.format("%.2f", item.amount)}")
+
+
+                Text(
+                    text = "${item.description}: -€${String.format("%.2f", item.amount)}",
+                )
+
             }
         }
-        Button(onClick = { showExpenseDialog = true }) {
-            Text("Gider Ekle")
+
+        Button(
+            onClick = { showExpenseDialog = true },
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Text("Add Expense")
         }
 
+        // Total overview section
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Genel Bakış bölümü
-        Text("Genel Bakış", style = MaterialTheme.typography.h6)
+        Text("Total Overview", style = MaterialTheme.typography.h6)
         Text("€${String.format("%.2f", totalAmount)}", style = MaterialTheme.typography.h4)
 
-        // Dialoglar
+        // Dialogs
         if (showIncomeDialog) {
             IncomeDialog(
                 incomeDescription = incomeDescription,
@@ -192,12 +230,18 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 onDismiss = { showIncomeDialog = false },
                 onConfirm = {
                     val amount = incomeAmount.toDoubleOrNull() ?: 0.0
-                    val newItem = IncomeExpenseItem(description = incomeDescription, amount = amount, isActive = true, type = "income")
+                    val userId = getUserId() ?: return@IncomeDialog
+                    val newItem = IncomeExpenseItem(
+                        userId = userId,
+                        description = incomeDescription,
+                        amount = amount,
+                        isActive = true,
+                        type = "income"
+                    )
                     scope.launch {
                         withContext(scope.coroutineContext) {
                             database.incomeExpenseDao().insertIncomeItem(newItem)
                             homeScreenViewModel.refreshLists()
-
                         }
                     }
                     showIncomeDialog = false
@@ -216,13 +260,19 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 onDismiss = { showExpenseDialog = false },
                 onConfirm = {
                     val amount = expenseAmount.toDoubleOrNull() ?: 0.0
-                    val newItem = IncomeExpenseItem(description = expenseDescription, amount = amount, isActive = true, type = "expense")
+                    val userId = getUserId() ?: return@ExpenseDialog
+                    val newItem = IncomeExpenseItem(
+                        userId = userId,
+                        description = expenseDescription,
+                        amount = amount,
+                        isActive = true,
+                        type = "expense"
+                    )
                     scope.launch {
-                        withContext(scope.coroutineContext) {
+                        withContext(Dispatchers.IO) {
                             database.incomeExpenseDao().insertExpenseItem(newItem)
-                            homeScreenViewModel.refreshLists()
-
                         }
+                        homeScreenViewModel.refreshLists()
                     }
                     showExpenseDialog = false
                     expenseAmount = ""
@@ -232,6 +282,8 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
         }
     }
 }
+
+
 
 @Composable
 fun IncomeDialog(
@@ -244,19 +296,19 @@ fun IncomeDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Yeni Gelir") },
+        title = { Text("New Income") },
         text = {
             Column {
                 TextField(
                     value = incomeDescription,
                     onValueChange = onIncomeDescriptionChange,
-                    label = { Text("İsim") }
+                    label = { Text("Description") }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = incomeAmount,
                     onValueChange = onIncomeAmountChange,
-                    label = { Text("Miktar") },
+                    label = { Text("Amount") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
@@ -266,12 +318,12 @@ fun IncomeDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm) {
-                Text("Geliri Onayla")
+                Text("Confirm Income")
             }
         },
         dismissButton = {
             Button(onClick = onDismiss) {
-                Text("İptal")
+                Text("Cancel")
             }
         }
     )
@@ -288,19 +340,19 @@ fun ExpenseDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Yeni Gider") },
+        title = { Text("New Expense") },
         text = {
             Column {
                 TextField(
                     value = expenseDescription,
                     onValueChange = onExpenseDescriptionChange,
-                    label = { Text("İsim") }
+                    label = { Text("Description") }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = expenseAmount,
                     onValueChange = onExpenseAmountChange,
-                    label = { Text("Miktar") },
+                    label = { Text("Amount") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
@@ -310,14 +362,18 @@ fun ExpenseDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm) {
-                Text("Gideri Onayla")
+                Text("Confirm Expense")
             }
         },
         dismissButton = {
             Button(onClick = onDismiss) {
-                Text("İptal")
+                Text("Cancel")
             }
         }
     )
 }
 
+fun getUserId(): String? {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    return currentUser?.uid
+}
