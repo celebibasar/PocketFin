@@ -81,7 +81,7 @@ fun PocketFinApp(database: PocketFinDatabase) {
         bottomBar = {
             BottomNavigationBar(navController)
         },
-        backgroundColor = Color.LightGray,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         NavigationHost(navController, Modifier.padding(innerPadding), database, scope)
@@ -122,10 +122,10 @@ fun BottomNavigationBar(navController: NavHostController) {
             BottomNavigationItem(
                 icon = {
                     when (screen) {
-                        "home" -> Icon(Icons.Default.Home, contentDescription = "Home")
-                        "askToGemini" -> Icon(Icons.Default.Settings, contentDescription = "AskToGemini")
-                        "profile" -> Icon(Icons.Default.Person, contentDescription = "Profile")
-                        else -> Icon(Icons.Default.Home, contentDescription = "Home")
+                        "home" -> Icon(Icons.Default.Home, contentDescription = "Home", tint = VibrantGreen)
+                        "askToGemini" -> Icon(Icons.Default.Settings, contentDescription = "AskToGemini", tint = VibrantGreen)
+                        "profile" -> Icon(Icons.Default.Person, contentDescription = "Profile", tint = VibrantGreen)
+                        else -> Icon(Icons.Default.Home, contentDescription = "Home", tint = VibrantGreen)
                     }
                 },
                 label = {
@@ -161,6 +161,9 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
     var expenseDescription by remember { mutableStateOf("") }
     var showIncomeDialog by remember { mutableStateOf(false) }
     var showExpenseDialog by remember { mutableStateOf(false) }
+    val isDarkTheme = isSystemInDarkTheme()
+    val textColor = if (isDarkTheme) Color.White else Color.Black
+
 
     val incomeList by homeScreenViewModel.incomeList.observeAsState(emptyList())
     val expenseList by homeScreenViewModel.expenseList.observeAsState(emptyList())
@@ -178,6 +181,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -247,7 +251,8 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
             Text(
                 text = "Total Overview",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = textColor
             )
 
             Text(
@@ -328,8 +333,10 @@ private fun IncomeExpenseItemRow(
     database: PocketFinDatabase
 ) {
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
-    val itemColor = if (item.type == "income") VibrantGreen else VibrantPink
-    val checkboxColor = if (item.type == "income") VibrantGreen else VibrantPink
+    val itemColor = if (item.type == "income") VibrantGreen else Red500
+    val checkboxColor = if (item.type == "income") VibrantGreen else Red500
+    val isDarkTheme = isSystemInDarkTheme()
+    val textColor = if (isDarkTheme) Color.White else Color.Black
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -354,7 +361,8 @@ private fun IncomeExpenseItemRow(
             colors = CheckboxDefaults.colors(checkedColor = checkboxColor)
         )
         Column {
-            Text(text = item.description ?: "", style = MaterialTheme.typography.bodyLarge)
+
+            Text(text = item.description ?: "", style = MaterialTheme.typography.bodyLarge, color = textColor)
             Text(
                 text = "€${String.format("%.2f", item.amount ?: 0.0)}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -375,13 +383,16 @@ fun IncomeDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
+    val textColor = if (isDarkTheme) Color.White else Color.Black
     AlertDialog(
         onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 "Add Income",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = VibrantGreen
+                color = textColor
             )
         },
         text = {
@@ -432,13 +443,16 @@ fun ExpenseDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
+    val textColor = if (isDarkTheme) Color.White else Color.Black
     AlertDialog(
         onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Red500
+                color = textColor
             )
         },
         text = {

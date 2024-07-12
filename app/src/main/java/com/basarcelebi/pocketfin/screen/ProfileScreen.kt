@@ -50,6 +50,8 @@ fun ProfileScreen(
     val user = viewModel.user
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
+    val textColor = if (isDarkTheme) Color.White else Color.Black
 
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme(),
@@ -115,9 +117,9 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     user?.let {
-                        Text(text = "${it.displayName}", fontSize = 20.sp, color = Color.White)
+                        Text(text = "${it.displayName}", fontSize = 20.sp, color = textColor)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "${it.email}", fontSize = 16.sp,color = Color.White)
+                        Text(text = "${it.email}", fontSize = 16.sp,color = textColor)
                     }
                 }
             }
@@ -174,8 +176,8 @@ fun ProfileScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text(text = item.name, fontSize = 18.sp,color = Color.White)
-                                Text(text = item.description, fontSize = 14.sp, color = Color.Gray)
+                                Text(text = item.name, fontSize = 18.sp,color = textColor)
+                                Text(text = item.description, fontSize = 14.sp, color = textColor)
                             }
                         }
                     }
