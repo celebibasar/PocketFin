@@ -1,8 +1,12 @@
 package com.basarcelebi.pocketfin
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -109,11 +113,17 @@ fun PocketFinApp(database: PocketFinDatabase) {
 
 @Composable
 fun Logo() {
-    val logo: Painter = painterResource(id = R.drawable.ic_google)
+    val logo: Painter = painterResource(id = R.drawable.pocket_fin_logo)
+    val openUrlLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
     Image(
         painter = logo,
         contentDescription = "Logo",
-        modifier = Modifier.size(64.dp)
+        modifier = Modifier.size(132.dp)
+            .clickable {
+                val url = "https://github.com/celebibasar/PocketFin"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                openUrlLauncher.launch(intent)
+            }
     )
 }
 
