@@ -3,6 +3,7 @@ package com.basarcelebi.pocketfin.screen
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -68,16 +69,14 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(15.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .border(4.dp, Color.Gray, RoundedCornerShape(30.dp)),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface
 
                 ),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
-                ),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(30.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -137,7 +136,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(64.dp)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                            .border(4.dp, Color.Gray, RoundedCornerShape(30.dp))
                             .clickable {
                                 when (index) {
                                     0 -> navController.navigate("account")
@@ -155,18 +154,15 @@ fun ProfileScreen(
                                 }
                             },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface
+                            containerColor = MaterialTheme.colorScheme.surface
 
-                        ),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 2.dp
                         )
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 8.dp),
+                                .padding(horizontal = 8.dp)
+                                .background(MaterialTheme.colorScheme.surface),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(

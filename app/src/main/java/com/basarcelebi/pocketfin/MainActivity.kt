@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -113,7 +114,9 @@ fun PocketFinApp(database: PocketFinDatabase) {
 
 @Composable
 fun Logo() {
-    val logo: Painter = painterResource(id = R.drawable.pocket_fin_logo)
+
+    val isDarkTheme = isSystemInDarkTheme()
+    val logo: Painter = painterResource(id = if (isDarkTheme) R.drawable.pocket_fin_logo_darktheme else R.drawable.pocket_fin_logo)
     val openUrlLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
     Image(
         painter = logo,
@@ -289,6 +292,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Total Overview",
+                fontSize = 32.sp,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = textColor
@@ -296,6 +300,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
 
             Text(
                 text = "€${String.format("%.2f", totalAmount)}",
+                fontSize = 24.sp,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = if (totalAmount >= 0) VibrantGreen else Red500
             )
@@ -403,10 +408,10 @@ private fun IncomeExpenseItemRow(
         )
         Column {
 
-            Text(text = item.description ?: "", style = MaterialTheme.typography.bodyLarge, color = textColor)
+            Text(text = item.description ?: "", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), color = textColor)
             Text(
                 text = "€${String.format("%.2f", item.amount ?: 0.0)}",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = itemColor
             )
         }
