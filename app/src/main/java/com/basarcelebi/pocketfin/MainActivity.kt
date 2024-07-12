@@ -18,8 +18,11 @@ import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.darkColorScheme
@@ -270,7 +273,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                     onIncomeAmountChange = { incomeAmount = it },
                     onDismiss = { showIncomeDialog = false },
                     onConfirm = {
-                        val amount = incomeAmount.replace(",", ".").toDoubleOrNull() ?: 0.0
+                        val amount = incomeAmount.replace(",", ".").replace("-","").replace("+","").toDoubleOrNull() ?: 0.0
                         val userId = getUserId() ?: return@IncomeDialog
                         val newItem = IncomeExpenseItem(
                             userId = userId,
@@ -300,7 +303,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                     onExpenseAmountChange = { expenseAmount = it },
                     onDismiss = { showExpenseDialog = false },
                     onConfirm = {
-                        val amount = expenseAmount.replace(",", ".").toDoubleOrNull() ?: 0.0
+                        val amount = expenseAmount.replace(",", ".").replace("-","").replace("+","").toDoubleOrNull() ?: 0.0
                         val userId = getUserId() ?: return@ExpenseDialog
                         val newItem = IncomeExpenseItem(
                             userId = userId,
@@ -333,10 +336,12 @@ private fun IncomeExpenseItemRow(
     database: PocketFinDatabase
 ) {
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
-    val itemColor = if (item.type == "income") VibrantGreen else Red500
-    val checkboxColor = if (item.type == "income") VibrantGreen else Red500
+    val itemColor = if (item.type == "income") VibrantGreen else Red700
+    val checkboxColor = if (item.type == "income") VibrantGreen else Red700
     val isDarkTheme = isSystemInDarkTheme()
     val textColor = if (isDarkTheme) Color.White else Color.Black
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -369,7 +374,148 @@ private fun IncomeExpenseItemRow(
                 color = itemColor
             )
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { isDropdownExpanded = !isDropdownExpanded }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                DropdownMenu(
+                    expanded = isDropdownExpanded,
+                    onDismissRequest = { isDropdownExpanded = false },
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                ) {
+                    DropdownMenuItem(onClick = {
+                        isDropdownExpanded = false
+                        showDialog = true
+                    },modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = textColor)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Edit", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = textColor)
+                    }
+                    DropdownMenuItem(onClick = {
+                        isDropdownExpanded = false
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                database.incomeExpenseDao().deleteItem(item)
+                            }
+                            homeScreenViewModel.refreshLists()
+                        }
+                    },modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Edit", tint = textColor)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Delete", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = textColor)
+                    }
+                }
+            }
+        }
     }
+
+    if (showDialog) {
+        if (item.type == "income")
+            EditItemDialog(item = item, onDismiss = { showDialog = false }, database = database, scope = scope, homeScreenViewModel = homeScreenViewModel)
+        else
+            EditItemDialog(item = item, onDismiss = { showDialog = false }, database = database, scope = scope, homeScreenViewModel = homeScreenViewModel)
+    }
+
+}
+
+@Composable
+fun EditItemDialog(
+    item: IncomeExpenseItem,
+    onDismiss: () -> Unit,
+    database: PocketFinDatabase,
+    scope: CoroutineScope,
+    homeScreenViewModel: HomeScreenViewModel
+) {
+    var description by remember { mutableStateOf(item.description ?: "") }
+    var amount by remember { mutableStateOf(item.amount?.toString() ?: "") }
+    val isDarkTheme = isSystemInDarkTheme()
+    val textColor = if (isDarkTheme) Color.White else Color.Black
+    val itemTypeColor = if (item.type == "income") VibrantGreen else Red700
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Item",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = textColor) },
+        text = {
+            Column {
+                TextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Name", color = textColor) },
+                    leadingIcon = {
+                        Icon(painter = painterResource(id = R.drawable.description_24px), contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = textColor,
+                        leadingIconColor = textColor,
+                        cursorColor = textColor
+                    )
+                )
+                TextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    leadingIcon = {
+                        Icon(painter = painterResource(id = R.drawable.payments_24px), contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = itemTypeColor,
+                        leadingIconColor = itemTypeColor,
+                        cursorColor = textColor
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                val updatedItem = item.copy(description = description, amount = amount.replace(",", ".").replace("-","").replace("+","").toDoubleOrNull() ?: 0.0)
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        if (item.type == "income") {
+                            database.incomeExpenseDao().updateIncomeItem(updatedItem)
+                        } else {
+                            database.incomeExpenseDao().updateExpenseItem(updatedItem)
+                        }
+                    }
+                    homeScreenViewModel.refreshLists()
+                }
+                onDismiss()
+            },colors = ButtonDefaults.buttonColors(
+                backgroundColor = VibrantGreen,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(
+                backgroundColor = Red700,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 
@@ -400,8 +546,21 @@ fun IncomeDialog(
                 TextField(
                     value = incomeDescription,
                     onValueChange = onIncomeDescriptionChange,
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Name", color = textColor) },
+                    leadingIcon = {
+                        Icon(painter = painterResource(id = R.drawable.description_24px), contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = textColor,
+                        leadingIconColor = textColor,
+                        cursorColor = textColor
+                    )
                 )
                 TextField(
                     value = incomeAmount,
@@ -411,7 +570,20 @@ fun IncomeDialog(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    leadingIcon = {
+                        Icon(painter = painterResource(id = R.drawable.payments_24px), contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = VibrantGreen,
+                        leadingIconColor = VibrantGreen,
+                        cursorColor = textColor
+                    )
                 )
             }
         },
@@ -460,8 +632,21 @@ fun ExpenseDialog(
                 TextField(
                     value = expenseDescription,
                     onValueChange = onExpenseDescriptionChange,
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Name") },
+                    leadingIcon = {
+                        Icon(painter = painterResource(id = R.drawable.description_24px), contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = textColor,
+                        leadingIconColor = textColor,
+                        cursorColor = textColor
+                    )
                 )
                 TextField(
                     value = expenseAmount,
@@ -471,7 +656,20 @@ fun ExpenseDialog(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    leadingIcon = {
+                        Icon(painter = painterResource(id = R.drawable.payments_24px), contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = Red700,
+                        leadingIconColor = Red700,
+                        cursorColor = textColor
+                    )
                 )
             }
         },

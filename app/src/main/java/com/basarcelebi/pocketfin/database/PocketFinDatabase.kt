@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -52,6 +53,12 @@ interface UserDao {
 
 @Dao
 interface IncomeExpenseDao {
+
+    @Delete
+    suspend fun deleteItem(item: IncomeExpenseItem)
+
+    @Query("DELETE FROM income_expense_items")
+    suspend fun deleteAllItems()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIncomeItem(item: IncomeExpenseItem)
