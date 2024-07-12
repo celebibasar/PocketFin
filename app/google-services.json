@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "595697009089",
+    "project_id": "pocketfin-d8d8b",
+    "storage_bucket": "pocketfin-d8d8b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595697009089:android:3a68f9f9ed2502a3796f40",
+        "android_client_info": {
+          "package_name": "com.basarcelebi.pocketfin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "595697009089-3ghb1u6ahblcmkjr656tcqis523tgjp2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZOk40IpOcNxmjBeJJ-U4h6Q0u2mKJb4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595697009089-3ghb1u6ahblcmkjr656tcqis523tgjp2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
