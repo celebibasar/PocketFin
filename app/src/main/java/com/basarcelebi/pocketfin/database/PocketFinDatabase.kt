@@ -2,7 +2,6 @@ package com.basarcelebi.pocketfin.database
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.room.AutoMigration
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
@@ -14,8 +13,6 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Update
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 
 
 @Database(entities = [User::class, IncomeExpenseItem::class], version = 6, exportSchema = false)
