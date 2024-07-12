@@ -3,6 +3,7 @@ package com.basarcelebi.pocketfin
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -32,6 +33,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +83,20 @@ fun PocketFinApp(database: PocketFinDatabase) {
     val scope = rememberCoroutineScope()
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Logo()
+                    }
+                },
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
         bottomBar = {
             BottomNavigationBar(navController)
         },
@@ -89,6 +105,16 @@ fun PocketFinApp(database: PocketFinDatabase) {
     ) { innerPadding ->
         NavigationHost(navController, Modifier.padding(innerPadding), database, scope)
     }
+}
+
+@Composable
+fun Logo() {
+    val logo: Painter = painterResource(id = R.drawable.ic_google)
+    Image(
+        painter = logo,
+        contentDescription = "Logo",
+        modifier = Modifier.size(64.dp)
+    )
 }
 
 @Composable
