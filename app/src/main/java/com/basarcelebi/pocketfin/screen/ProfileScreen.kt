@@ -20,6 +20,7 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -32,6 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle.Companion.Italic
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,15 +43,16 @@ import androidx.navigation.compose.rememberNavController
 import com.basarcelebi.pocketfin.R
 import com.basarcelebi.pocketfin.SignInActivity
 import com.basarcelebi.pocketfin.data.ProfileData
-import com.basarcelebi.pocketfin.viewmodel.ProfileViewModel
+import com.basarcelebi.pocketfin.database.User
+import com.basarcelebi.pocketfin.network.UserAuth
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
+    auth: UserAuth = UserAuth(),
     navController: NavController = rememberNavController()
 ) {
-    val user = viewModel.user
+    val user = auth.user
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
@@ -70,7 +74,7 @@ fun ProfileScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth()
-                    .border(4.dp, Color.Gray, RoundedCornerShape(30.dp)),
+                    .border(1.dp, if (isDarkTheme) Color.White else Color.DarkGray, RoundedCornerShape(30.dp)),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface
@@ -84,28 +88,15 @@ fun ProfileScreen(
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    val rainbowColorsBrush = remember {
-                        Brush.sweepGradient(
-                            listOf(
-                                Color(0xFF9575CD),
-                                Color(0xFFBA68C8),
-                                Color(0xFFE57373),
-                                Color(0xFFFFB74D),
-                                Color(0xFFFFF176),
-                                Color(0xFFAED581),
-                                Color(0xFF4DD0E1),
-                                Color(0xFF9575CD)
-                            )
-                        )
-                    }
-                    val borderWidth = 4.dp
+
+                    val borderWidth = 1.dp
                     Image(
                         painter = painterResource(id = R.drawable.ic_google),
                         contentDescription = null,
                         modifier = Modifier
                             .clip(CircleShape)
                             .size(75.dp)
-                            .border(BorderStroke(borderWidth, rainbowColorsBrush), CircleShape)
+                            .border(width = borderWidth, color = if (isDarkTheme) Color.White else Color.DarkGray, shape = CircleShape)
                             .clickable { }
                     )
                 }
@@ -116,9 +107,9 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     user?.let {
-                        Text(text = "${it.displayName}", fontSize = 20.sp, color = textColor)
+                        Text(text = "${it.displayName}", fontSize = 20.sp, color = textColor, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "${it.email}", fontSize = 16.sp,color = textColor)
+                        Text(text = "${it.email}", fontSize = 16.sp,color = textColor, style = MaterialTheme.typography.bodyMedium.copy(fontStyle = Italic))
                     }
                 }
             }
@@ -136,7 +127,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(64.dp)
-                            .border(4.dp, Color.Gray, RoundedCornerShape(30.dp))
+                            .border(1.dp, Color.DarkGray, RoundedCornerShape(240.dp))
                             .clickable {
                                 when (index) {
                                     0 -> navController.navigate("account")
@@ -144,7 +135,7 @@ fun ProfileScreen(
                                     2 -> navController.navigate("about")
                                     3 -> {
                                         coroutineScope.launch {
-                                            viewModel.logout()
+                                            auth.logout()
                                             Intent(context, SignInActivity::class.java).apply {
                                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                                 context.startActivity(this)
@@ -163,17 +154,19 @@ fun ProfileScreen(
                                 .fillMaxSize()
                                 .padding(horizontal = 8.dp)
                                 .background(MaterialTheme.colorScheme.surface),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
                         ) {
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = null,
-                                modifier = Modifier.size(36.dp)
+                                modifier = Modifier.size(42.dp),
+                                tint = if (isDarkTheme) Color.White else Color.Black
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text(text = item.name, fontSize = 18.sp,color = textColor)
-                                Text(text = item.description, fontSize = 14.sp, color = textColor)
+                                Text(text = item.name, fontSize = 20.sp,color = textColor, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+                                Text(text = item.description, fontSize = 12.sp, color = if (isDarkTheme) Color.White else Color.Black, style = MaterialTheme.typography.bodyMedium.copy(fontStyle = Italic))
                             }
                         }
                     }
@@ -181,4 +174,12 @@ fun ProfileScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    val navController = rememberNavController()
+
+   //  ProfileScreen(navController = navController)
 }

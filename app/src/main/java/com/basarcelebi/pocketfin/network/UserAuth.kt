@@ -1,10 +1,8 @@
-package com.basarcelebi.pocketfin.viewmodel
+package com.basarcelebi.pocketfin.network
 
-import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-class ProfileViewModel : ViewModel() {
-
+class UserAuth {
     private val auth = FirebaseAuth.getInstance()
 
     val user = auth.currentUser

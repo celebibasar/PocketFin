@@ -15,13 +15,13 @@ object ProfileData {
         return listOf(
             ProfileOptions(
                 name = "Account",
-                description = "You can see the detail of your account settings",
+                description = "You can see the detail of your account",
                 icon = Icons.Default.AccountCircle
 
             ),
             ProfileOptions(
                 name = "Security",
-                description = "You can access the privacy policy of the PocketFin App",
+                description = "You can read the privacy policy of the PocketFin App",
                 icon = Icons.Default.Lock
 
             ),

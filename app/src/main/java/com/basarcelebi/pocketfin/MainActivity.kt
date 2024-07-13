@@ -3,6 +3,7 @@ package com.basarcelebi.pocketfin
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -23,6 +24,7 @@ import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
@@ -47,12 +49,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.basarcelebi.pocketfin.database.IncomeExpenseItem
 import com.basarcelebi.pocketfin.database.PocketFinDatabase
+import com.basarcelebi.pocketfin.network.UserAuth
+import com.basarcelebi.pocketfin.screen.AboutScreen
+import com.basarcelebi.pocketfin.screen.AccountScreen
+import com.basarcelebi.pocketfin.screen.PrivacyScreen
 import com.basarcelebi.pocketfin.screen.ProfileScreen
 import com.basarcelebi.pocketfin.ui.theme.PocketFinTheme
 import com.basarcelebi.pocketfin.ui.theme.Red500
@@ -75,7 +83,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PocketFinTheme {
-                PocketFinApp(database)
+                PocketFinApp(database = database)
             }
         }
     }
@@ -83,24 +91,17 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun PocketFinApp(database: PocketFinDatabase) {
-    val navController = rememberNavController()
-    val scope = rememberCoroutineScope()
+fun PocketFinApp(navController: NavHostController = rememberNavController(), database: PocketFinDatabase, scope: CoroutineScope = rememberCoroutineScope()) {
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val isBackStackEmpty by remember(navBackStackEntry) {
+        mutableStateOf(navBackStackEntry?.destination?.route == "home")
+    }
+
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Logo()
-                    }
-                },
-                backgroundColor = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxWidth()
-            )
+            PocketFinAppTopAppBar(navController, isBackStackEmpty)
         },
         bottomBar = {
             BottomNavigationBar(navController)
@@ -113,6 +114,38 @@ fun PocketFinApp(database: PocketFinDatabase) {
 }
 
 @Composable
+fun PocketFinAppTopAppBar(navController: NavController, isBackStackEmpty: Boolean) {
+    val title = @androidx.compose.runtime.Composable {
+        Box(
+            Modifier.padding(start = 70.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Logo()
+        }
+    }
+
+    val navigationIcon = @androidx.compose.runtime.Composable {
+        if (!isBackStackEmpty) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+
+    TopAppBar(
+        title = title,
+        navigationIcon = navigationIcon,
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+
+@Composable
 fun Logo() {
 
     val isDarkTheme = isSystemInDarkTheme()
@@ -121,7 +154,8 @@ fun Logo() {
     Image(
         painter = logo,
         contentDescription = "Logo",
-        modifier = Modifier.size(132.dp)
+        modifier = Modifier
+            .size(132.dp)
             .clickable {
                 val url = "https://github.com/celebibasar/PocketFin"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -142,10 +176,19 @@ fun NavigationHost(
             HomeScreen(database, scope)
         }
         composable(Screen.AskToGemini.route) {
-            ProfileScreen()
+            ProfileScreen(UserAuth(), navController)
         }
         composable(Screen.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(UserAuth(), navController)
+        }
+        composable(Screen.Account.route) {
+            AccountScreen()
+        }
+        composable(Screen.Security.route) {
+            PrivacyScreen()
+        }
+        composable(Screen.About.route) {
+            AboutScreen()
         }
     }
 }
@@ -165,7 +208,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 icon = {
                     when (screen) {
                         "home" -> Icon(Icons.Default.Home, contentDescription = "Home", tint = VibrantGreen)
-                        "askToGemini" -> Icon(Icons.Default.Settings, contentDescription = "AskToGemini", tint = VibrantGreen)
+                        "askToGemini" -> Icon(painter = painterResource(id = R.drawable.gemini), contentDescription = "Ask to Gemini", tint = VibrantGreen,modifier = Modifier.size(24.dp))
                         "profile" -> Icon(Icons.Default.Person, contentDescription = "Profile", tint = VibrantGreen)
                         else -> Icon(Icons.Default.Home, contentDescription = "Home", tint = VibrantGreen)
                     }
