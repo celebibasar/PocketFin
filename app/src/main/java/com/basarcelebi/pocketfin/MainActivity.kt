@@ -176,7 +176,7 @@ fun NavigationHost(
             HomeScreen(database, scope)
         }
         composable(Screen.AskToGemini.route) {
-            ProfileScreen(UserAuth(), navController)
+            ChatActivity().ChatScreen(paddingValues = PaddingValues(16.dp))
         }
         composable(Screen.Profile.route) {
             ProfileScreen(UserAuth(), navController)

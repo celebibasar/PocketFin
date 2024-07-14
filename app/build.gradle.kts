@@ -4,6 +4,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
     id ("kotlin-kapt")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -43,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -56,6 +58,7 @@ android {
 
 dependencies {
 
+    implementation(libs.generativeai)
     val room_version = "2.6.1"
     // Room Database Implementation
     implementation("androidx.room:room-runtime:$room_version")
@@ -92,4 +95,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("com.google.ai.client.generativeai:generativeai:0.1.2")
+
 }

@@ -26,6 +26,7 @@ roomCompiler = "2.6.1"
 roomRuntime = "2.6.1"
 runtimeLivedata = "1.6.8"
 uiToolingPreview = "1.6.8"
+generativeai = "0.9.0"
 
 [libraries]
 androidx-activity-compose-v140 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -60,6 +61,7 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
