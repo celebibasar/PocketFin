@@ -7,7 +7,7 @@ import androidx.compose.ui.res.vectorResource
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector?) {
     object Home : Screen("home", "Home", Icons.Filled.Home)
-    object AskToGemini : Screen("askToGemini", "Ask to Gemini", Icons.Filled.Warning)
+    object AskToGemini : Screen("gemini", "Gemini", Icons.Filled.Warning)
     object Profile : Screen("profile", "Profile", Icons.Filled.Person)
     object Account : Screen("account", "Account", null)
     object Security : Screen("security", "Security", null)

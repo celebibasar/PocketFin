@@ -15,7 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.basarcelebi.pocketfin.R
 import com.basarcelebi.pocketfin.network.UserAuth
+import com.basarcelebi.pocketfin.ui.theme.VibrantGreen
 
 @Composable
 fun AccountScreen(
@@ -119,23 +121,17 @@ fun AccountScreen(
                     value = user?.displayName ?: "",
                     onValueChange = { /* Update display name */ },
                     label = { Text(text = "Display Name") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true
                 )
 
                 OutlinedTextField(
                     value = user?.email ?: "",
                     onValueChange = { /* Update email */ },
                     label = { Text(text = "Email") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true
                 )
-
-                // Save button
-                Button(
-                    onClick = { /* Save changes */ },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(text = "Save")
-                }
             }
         }
     }

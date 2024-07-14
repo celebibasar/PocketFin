@@ -34,6 +34,7 @@ abstract class PocketFinDatabase : RoomDatabase() {
                     "pocket_fin_database"
                 )
                     .fallbackToDestructiveMigration()
+                    .allowMainThreadQueries()
                     .build()
                 INSTANCE = instance
                 instance

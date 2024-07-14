@@ -1,5 +1,6 @@
 package com.basarcelebi.pocketfin
 
+import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -19,7 +21,11 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
@@ -38,8 +44,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +57,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -55,6 +66,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.basarcelebi.pocketfin.data.Chat
+import com.basarcelebi.pocketfin.data.ChatData
 import com.basarcelebi.pocketfin.database.IncomeExpenseItem
 import com.basarcelebi.pocketfin.database.PocketFinDatabase
 import com.basarcelebi.pocketfin.network.UserAuth
@@ -70,16 +83,20 @@ import com.basarcelebi.pocketfin.ui.theme.VibrantPink
 import com.basarcelebi.pocketfin.viewmodel.HomeScreenViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: PocketFinDatabase
+    private lateinit var chatData: ChatData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         database = PocketFinDatabase.getDatabase(applicationContext)
+        chatData = ChatData
 
         setContent {
             PocketFinTheme {
@@ -202,13 +219,13 @@ fun BottomNavigationBar(navController: NavHostController) {
         backgroundColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.primary
     ) {
-        val items = listOf("home", "askToGemini", "profile")
+        val items = listOf("home", "gemini", "profile")
         items.forEach { screen ->
             BottomNavigationItem(
                 icon = {
                     when (screen) {
                         "home" -> Icon(Icons.Default.Home, contentDescription = "Home", tint = VibrantGreen)
-                        "askToGemini" -> Icon(painter = painterResource(id = R.drawable.gemini), contentDescription = "Ask to Gemini", tint = VibrantGreen,modifier = Modifier.size(24.dp))
+                        "gemini" -> Icon(painter = painterResource(id = R.drawable.gemini), contentDescription = "Gemini", tint = VibrantGreen,modifier = Modifier.size(24.dp))
                         "profile" -> Icon(Icons.Default.Person, contentDescription = "Profile", tint = VibrantGreen)
                         else -> Icon(Icons.Default.Home, contentDescription = "Home", tint = VibrantGreen)
                     }
@@ -235,9 +252,12 @@ fun BottomNavigationBar(navController: NavHostController) {
 }
 
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
     val homeScreenViewModel: HomeScreenViewModel = viewModel()
+    val application :Application = LocalContext.current.applicationContext as Application
+    var response : Chat = Chat("",null,false)
 
     var totalAmount by remember { mutableStateOf(0.0) }
     var incomeAmount by remember { mutableStateOf("") }
@@ -246,6 +266,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
     var expenseDescription by remember { mutableStateOf("") }
     var showIncomeDialog by remember { mutableStateOf(false) }
     var showExpenseDialog by remember { mutableStateOf(false) }
+    var showAdviceDialog by remember { mutableStateOf(false) }
     val isDarkTheme = isSystemInDarkTheme()
     val textColor = if (isDarkTheme) Color.White else Color.Black
 
@@ -347,6 +368,22 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = if (totalAmount >= 0) VibrantGreen else Red500
             )
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { GlobalScope.launch(Dispatchers.Main) {
+                    try {
+                        response = ChatData.getResponseAndAdvice(application)
+                        showAdviceDialog = true
+                    } catch (e: Exception) {
+                        // Handle exception if needed
+                    } } },
+                    modifier = Modifier
+                        .then(Modifier.size(50.dp))
+                        .background(VibrantGreen, shape = CircleShape)) {
+                    Icon(painter = painterResource(id = R.drawable.gemini), modifier = Modifier.size(24.dp) ,contentDescription = "content description", tint = if (isDarkTheme) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surface)
+                }
+            }
 
 
             if (showIncomeDialog) {
@@ -408,6 +445,81 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                     }
                 )
             }
+
+            if (showAdviceDialog) {
+                Dialog(
+                    onDismissRequest = { showAdviceDialog = false },
+                    content = {
+                        Surface(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(16.dp)
+                                .heightIn(max = 400.dp)
+                                .widthIn(max = 300.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(if (isDarkTheme) Color.DarkGray else Color.White)
+                                    .padding(16.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .verticalScroll(rememberScrollState())
+                                        .weight(1f)
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "Response",
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = textColor
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = response.prompt
+                                            .replace("*", "")
+                                            .replace("\n\n", "\n")
+                                            .replace("\n", "\n\n"),
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = textColor
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .background(if (isDarkTheme) Color.DarkGray else Color.White)
+                                        .fillMaxWidth()
+                                        .clip(CircleShape),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Button(
+                                        onClick = { showAdviceDialog = false },
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .padding(8.dp),
+                                        colors = ButtonDefaults.buttonColors(backgroundColor = VibrantGreen)
+                                    ) {
+                                        Text(
+                                            "OK",
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.surface,
+                                            modifier = Modifier.background(VibrantGreen)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+                )
+            }
+
         }
     }
 }
