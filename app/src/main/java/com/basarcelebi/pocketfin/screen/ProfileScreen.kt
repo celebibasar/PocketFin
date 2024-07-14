@@ -82,27 +82,9 @@ fun ProfileScreen(
                 ),
                 shape = RoundedCornerShape(30.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .padding(8.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-
-                    val borderWidth = 1.dp
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .size(75.dp)
-                            .border(width = borderWidth, color = if (isDarkTheme) Color.White else Color.DarkGray, shape = CircleShape)
-                            .clickable { }
-                    )
-                }
                 Column(
                     modifier = Modifier
-                        .padding(top = 3.dp, bottom = 8.dp)
+                        .padding(top = 8.dp, bottom = 8.dp)
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {

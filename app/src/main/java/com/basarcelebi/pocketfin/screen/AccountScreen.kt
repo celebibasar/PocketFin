@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Button
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -78,21 +80,10 @@ fun AccountScreen(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
-                        .padding(8.dp)
+                        .padding(top = 8.dp, bottom = 8.dp)
                         .align(Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    val borderWidth = 1.dp
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .size(75.dp)
-                            .border(width = borderWidth, color = if (isDarkTheme) Color.White else Color.DarkGray, shape = CircleShape)
-                            .clickable { /* Image click action */ }
-                    )
 
                     Column(
                         modifier = Modifier
@@ -116,21 +107,43 @@ fun AccountScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Editable fields (example)
-                OutlinedTextField(
+
+                TextField(
                     value = user?.displayName ?: "",
                     onValueChange = { /* Update display name */ },
-                    label = { Text(text = "Display Name") },
+                    label = { Text(text = "Name-Surname", fontSize = 12.sp) },
                     modifier = Modifier.fillMaxWidth(),
-                    readOnly = true
+                    readOnly = true,
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = textColor,
+                        leadingIconColor = textColor,
+                        cursorColor = textColor
+                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 )
 
-                OutlinedTextField(
+                TextField(
                     value = user?.email ?: "",
                     onValueChange = { /* Update email */ },
-                    label = { Text(text = "Email") },
+                    label = { Text(text = "Email", fontSize = 12.sp) },
                     modifier = Modifier.fillMaxWidth(),
-                    readOnly = true
+                    readOnly = true,
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = textColor,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        placeholderColor = textColor,
+                        focusedIndicatorColor = textColor,
+                        unfocusedLabelColor = textColor,
+                        focusedLabelColor = textColor,
+                        leadingIconColor = textColor,
+                        cursorColor = textColor
+                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 )
             }
         }
