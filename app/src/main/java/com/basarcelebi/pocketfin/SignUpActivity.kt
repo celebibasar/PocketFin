@@ -61,10 +61,17 @@ class SignUpActivity : AppCompatActivity() {
 
     @Composable
     fun SignUpScreen() {
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
         var firstName by remember { mutableStateOf("") }
         var lastName by remember { mutableStateOf("") }
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var repassword by remember { mutableStateOf("") }
+        var firstNameError by remember { mutableStateOf("") }
+        var lastNameError by remember { mutableStateOf("") }
+        var emailError by remember { mutableStateOf("") }
+        var passwordError by remember { mutableStateOf("") }
+        var repasswordError by remember { mutableStateOf("") }
+
         val isDarkTheme = isSystemInDarkTheme()
         val textColor = if (isDarkTheme) Color.White else Color.Black
 
@@ -90,8 +97,10 @@ class SignUpActivity : AppCompatActivity() {
 
                     TextField(
                         value = firstName,
-                        onValueChange = { firstName = it },
-                        label = { Text("First Name", color = textColor) },
+                        onValueChange = { firstName = it
+                                        firstNameError = ""
+                        },
+                        label = { Text("First Name", color = textColor, modifier = Modifier.padding(bottom = 8.dp)) },
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null,tint = textColor) }, // Icon eklenen yer
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -110,13 +119,24 @@ class SignUpActivity : AppCompatActivity() {
                             focusedLabelColor = textColor,
                             leadingIconColor = textColor,
                             cursorColor = textColor
-                        )
+                        ),
+                        isError = firstNameError.isNotEmpty(),
                     )
+                    if (firstNameError.isNotEmpty()) {
+                        Text(
+                            text = firstNameError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
 
                     TextField(
                         value = lastName,
-                        onValueChange = { lastName = it },
-                        label = { Text("Last Name", color = textColor) },
+                        onValueChange = { lastName = it
+                                        lastNameError = ""
+                        },
+                        label = { Text("Last Name", color = textColor, modifier = Modifier.padding(bottom = 8.dp)) },
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = textColor) }, // Icon eklenen yer
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -135,13 +155,24 @@ class SignUpActivity : AppCompatActivity() {
                             focusedLabelColor = textColor,
                             leadingIconColor = textColor,
                             cursorColor = textColor
-                        )
+                        ),
+                        isError = lastNameError.isNotEmpty(),
                     )
+                    if (lastNameError.isNotEmpty()) {
+                        Text(
+                            text = lastNameError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
 
                     TextField(
                         value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email",color = textColor) },
+                        onValueChange = { email = it
+                                        emailError = ""
+                        },
+                        label = { Text("Email",color = textColor, modifier = Modifier.padding(bottom = 8.dp)) },
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null,tint = textColor) },
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -160,13 +191,24 @@ class SignUpActivity : AppCompatActivity() {
                             focusedLabelColor = textColor,
                             leadingIconColor = textColor,
                             cursorColor = textColor
-                        )
+                        ),
+                        isError = emailError.isNotEmpty()
                     )
+                    if (emailError.isNotEmpty()) {
+                        Text(
+                            text = emailError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
 
                     TextField(
                         value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password", color = textColor) },
+                        onValueChange = { password = it
+                                        passwordError = ""
+                        },
+                        label = { Text("Password", color = textColor,  modifier = Modifier.padding(bottom = 8.dp)) },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null,tint = textColor) },
@@ -186,11 +228,63 @@ class SignUpActivity : AppCompatActivity() {
                             focusedLabelColor = textColor,
                             leadingIconColor = textColor,
                             cursorColor = textColor
-                        )
+                        ),
+                        isError = passwordError.isNotEmpty()
                     )
+                    if (passwordError.isNotEmpty()) {
+                        Text(
+                            text = passwordError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    TextField(
+                        value = repassword,
+                        onValueChange = { repassword = it
+                                        repasswordError = ""
+                        },
+                        label = { Text("Repeat Password", color = textColor,  modifier = Modifier.padding(bottom = 8.dp)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null,tint = textColor) },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = textColor,
+                            backgroundColor = MaterialTheme.colorScheme.surface,
+                            placeholderColor = textColor,
+                            focusedIndicatorColor = textColor,
+                            unfocusedLabelColor = textColor,
+                            focusedLabelColor = textColor,
+                            leadingIconColor = textColor,
+                            cursorColor = textColor
+                        ),
+                        isError = repasswordError.isNotEmpty()
+                    )
+                    if (repasswordError.isNotEmpty()) {
+                        Text(
+                            text = repasswordError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
 
                     Button(
-                        onClick = { signUpWithEmailPassword(firstName, lastName, email, password) },
+                        onClick = { signUpWithEmailPassword(firstName, lastName, email, password, repassword) { success, errors ->
+                            if (!success) {
+                                firstNameError = errors["firstName"] ?: ""
+                                lastNameError = errors["lastName"] ?: ""
+                                emailError = errors["email"] ?: ""
+                                passwordError = errors["password"] ?: ""
+                                repasswordError = errors["repassword"] ?: ""
+                            } } },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -214,7 +308,20 @@ class SignUpActivity : AppCompatActivity() {
 
     }
 
-    private fun signUpWithEmailPassword(firstName: String, lastName: String, email: String, password: String) {
+    private fun signUpWithEmailPassword(firstName: String, lastName: String, email: String, password: String, repassword: String, callback: (Boolean, Map<String, String>) -> Unit) {
+        val errors = mutableMapOf<String, String>()
+
+        if (firstName.isBlank()) errors["firstName"] = "First name cannot be empty"
+        if (lastName.isBlank()) errors["lastName"] = "Last name cannot be empty"
+        if (email.isBlank()) errors["email"] = "Email cannot be empty"
+        if (password.isBlank()) errors["password"] = "Password cannot be empty"
+        if (repassword.isBlank()) errors["repassword"] = "Repeat password cannot be empty"
+        if (password != repassword) errors["repassword"] = "Passwords do not match"
+
+        if (errors.isNotEmpty()) {
+            callback(false, errors)
+            return
+        }
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -228,15 +335,18 @@ class SignUpActivity : AppCompatActivity() {
                     user?.updateProfile(profileUpdates)
                         ?.addOnCompleteListener { profileUpdateTask ->
                             if (profileUpdateTask.isSuccessful) {
+                                callback(true, emptyMap())
                                 Toast.makeText(this, "Signed up as ${user.displayName}", Toast.LENGTH_SHORT).show()
                                 startActivity(Intent(this, SignInActivity::class.java))
                                 finish()
                             } else {
-                                Toast.makeText(this, "Profile update failed: ${profileUpdateTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                errors["general"] = "Failed to sign up user"
+                                callback(false, errors)
                             }
                         }
                 } else {
-                    Toast.makeText(this, "Sign up failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    errors["general"] = "Sign up failed: ${task.exception?.message}"
+                    callback(false, errors)
                 }
             }
     }

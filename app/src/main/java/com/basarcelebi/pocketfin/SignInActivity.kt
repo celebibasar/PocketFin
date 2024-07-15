@@ -89,6 +89,8 @@ class SignInActivity : AppCompatActivity() {
 
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
+        var emailError by remember { mutableStateOf("") }
+        var passwordError by remember { mutableStateOf("") }
         val context = LocalContext.current
         val isDarkTheme = isSystemInDarkTheme()
         val textColor = if (isDarkTheme) Color.White else Color.Black
@@ -127,8 +129,9 @@ class SignInActivity : AppCompatActivity() {
 
                 TextField(
                     value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email", color = textColor) },
+                    onValueChange = { email = it
+                        emailError = ""},
+                    label = { Text("Email", color = textColor, modifier = Modifier.padding(bottom = 8.dp)) },
                     singleLine = true,
                     leadingIcon = {
                         Icon(Icons.Default.Email, contentDescription = null, tint = textColor)
@@ -148,8 +151,9 @@ class SignInActivity : AppCompatActivity() {
 
                 TextField(
                     value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password", color = textColor) },
+                    onValueChange = { password = it
+                        passwordError = ""},
+                    label = { Text("Password", color = textColor, modifier = Modifier.padding(bottom = 8.dp)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     leadingIcon = {
@@ -165,12 +169,25 @@ class SignInActivity : AppCompatActivity() {
                         focusedLabelColor = textColor,
                         leadingIconColor = textColor,
                         cursorColor = textColor
-                    )
-
+                    ),
+                    isError = passwordError.isNotEmpty()
                 )
+                if (passwordError.isNotEmpty()) {
+                    Text(
+                        text = passwordError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
 
                 Button(
-                    onClick = { signInWithEmailPassword(email, password, context) },
+                    onClick = { if (email.isNotEmpty() && password.isNotEmpty()) {
+                        signInWithEmailPassword(email, password, context){ success, errorMessage ->
+                            if (!success) {
+                                passwordError = errorMessage
+                            } }
+                    }},
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -235,17 +252,18 @@ class SignInActivity : AppCompatActivity() {
     }
 
 
-    fun signInWithEmailPassword(email: String, password: String, context: Context) {
+    fun signInWithEmailPassword(email: String, password: String, context: Context, callback: (Boolean, String) -> Unit) {
         val auth = FirebaseAuth.getInstance()
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
+                    callback(true, "")
                     Toast.makeText(context, "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(context, "Authentication failed", Toast.LENGTH_SHORT).show()
+                    callback(false, "Wrong email or password, please try again!")
                 }
             }
     }
@@ -259,7 +277,7 @@ class SignInActivity : AppCompatActivity() {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Wrong email or password, please try again!", Toast.LENGTH_SHORT).show()
                 }
             }
     }

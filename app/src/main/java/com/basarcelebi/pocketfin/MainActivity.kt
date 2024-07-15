@@ -11,15 +11,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,11 +28,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
@@ -47,18 +40,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -79,7 +69,6 @@ import com.basarcelebi.pocketfin.ui.theme.PocketFinTheme
 import com.basarcelebi.pocketfin.ui.theme.Red500
 import com.basarcelebi.pocketfin.ui.theme.Red700
 import com.basarcelebi.pocketfin.ui.theme.VibrantGreen
-import com.basarcelebi.pocketfin.ui.theme.VibrantPink
 import com.basarcelebi.pocketfin.viewmodel.HomeScreenViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -126,7 +115,7 @@ fun PocketFinApp(navController: NavHostController = rememberNavController(), dat
         backgroundColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        NavigationHost(navController, Modifier.padding(innerPadding), database, scope)
+            NavigationHost(navController, Modifier.padding(innerPadding), database, scope)
     }
 }
 
@@ -300,6 +289,8 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 color = VibrantGreen
             )
 
+
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -330,6 +321,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = Red500
             )
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -384,6 +376,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                     Icon(painter = painterResource(id = R.drawable.gemini), modifier = Modifier.size(24.dp) ,contentDescription = "content description", tint = if (isDarkTheme) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surface)
                 }
             }
+
 
 
             if (showIncomeDialog) {
@@ -506,7 +499,9 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                                     ) {
                                         Text(
                                             "OK",
-                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
                                             color = MaterialTheme.colorScheme.surface,
                                             modifier = Modifier.background(VibrantGreen)
                                         )
