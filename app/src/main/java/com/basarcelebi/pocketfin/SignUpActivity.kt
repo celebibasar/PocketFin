@@ -218,7 +218,7 @@ class SignUpActivity : AppCompatActivity() {
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 8.dp),
                         colors = TextFieldDefaults.textFieldColors(
                             textColor = textColor,
                             backgroundColor = MaterialTheme.colorScheme.surface,

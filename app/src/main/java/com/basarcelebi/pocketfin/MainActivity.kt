@@ -571,7 +571,7 @@ private fun IncomeExpenseItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { isDropdownExpanded = !isDropdownExpanded }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = textColor)
                 DropdownMenu(
                     expanded = isDropdownExpanded,
                     onDismissRequest = { isDropdownExpanded = false },
@@ -628,9 +628,10 @@ fun EditItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         title = { Text("Edit Item",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = textColor) },
+            color = textColor, modifier = Modifier.padding(16.dp)) },
         text = {
             Column {
                 TextField(
@@ -729,7 +730,7 @@ fun IncomeDialog(
             Text(
                 "Add Income",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = textColor
+                color = textColor, modifier = Modifier.padding(16.dp)
             )
         },
         text = {
@@ -815,7 +816,7 @@ fun ExpenseDialog(
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = textColor
+                color = textColor, modifier = Modifier.padding(16.dp)
             )
         },
         text = {
