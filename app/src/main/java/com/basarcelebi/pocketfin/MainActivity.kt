@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
@@ -360,21 +361,21 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = if (totalAmount >= 0) VibrantGreen else Red500
             )
-            Spacer(modifier = Modifier.height(48.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { GlobalScope.launch(Dispatchers.Main) {
-                    try {
-                        response = ChatData.getResponseAndAdvice(application)
-                        showAdviceDialog = true
-                    } catch (e: Exception) {
-                        // Handle exception if needed
-                    } } },
-                    modifier = Modifier
-                        .then(Modifier.size(50.dp))
-                        .background(VibrantGreen, shape = CircleShape)) {
-                    Icon(painter = painterResource(id = R.drawable.gemini), modifier = Modifier.size(24.dp) ,contentDescription = "content description", tint = if (isDarkTheme) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surface)
-                }
+            SmallFloatingActionButton(onClick = { GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    response = ChatData.getResponseAndAdvice(application)
+                    showAdviceDialog = true
+                } catch (e: Exception) {
+
+                } } },
+                modifier = Modifier
+                    .then(Modifier.size(50.dp).align(Alignment.End))
+                    ,shape = CircleShape,
+                containerColor = VibrantGreen) {
+                Icon(painter = painterResource(id = R.drawable.gemini), modifier = Modifier.size(24.dp).background(
+                    VibrantGreen) ,contentDescription = "content description", tint = MaterialTheme.colorScheme.surface)
+
             }
 
 
