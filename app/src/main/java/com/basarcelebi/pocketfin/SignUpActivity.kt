@@ -335,18 +335,15 @@ class SignUpActivity : AppCompatActivity() {
                     user?.updateProfile(profileUpdates)
                         ?.addOnCompleteListener { profileUpdateTask ->
                             if (profileUpdateTask.isSuccessful) {
-                                callback(true, emptyMap())
                                 Toast.makeText(this, "Signed up as ${user.displayName}", Toast.LENGTH_SHORT).show()
-                                startActivity(Intent(this, SignInActivity::class.java))
+                                startActivity(Intent(this, MainActivity::class.java))
                                 finish()
                             } else {
-                                errors["general"] = "Failed to sign up user"
-                                callback(false, errors)
+                                Toast.makeText(this, "Profile update failed: ${profileUpdateTask.exception?.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
                 } else {
-                    errors["general"] = "Sign up failed: ${task.exception?.message}"
-                    callback(false, errors)
+                    Toast.makeText(this, "Sign up failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }

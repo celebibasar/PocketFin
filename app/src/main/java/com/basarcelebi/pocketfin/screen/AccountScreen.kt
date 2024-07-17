@@ -111,7 +111,7 @@ fun AccountScreen(
                 TextField(
                     value = user?.displayName ?: "",
                     onValueChange = { /* Update display name */ },
-                    label = { Text(text = "Name-Surname", fontSize = 12.sp) },
+                    label = { Text(text = "Name-Surname", fontSize = 12.sp, color = textColor) },
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
                     colors = TextFieldDefaults.textFieldColors(
@@ -130,7 +130,7 @@ fun AccountScreen(
                 TextField(
                     value = user?.email ?: "",
                     onValueChange = { /* Update email */ },
-                    label = { Text(text = "Email", fontSize = 12.sp) },
+                    label = { Text(text = "Email", fontSize = 12.sp, color = textColor) },
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
                     colors = TextFieldDefaults.textFieldColors(

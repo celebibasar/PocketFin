@@ -362,6 +362,7 @@ fun HomeScreen(database: PocketFinDatabase, scope: CoroutineScope) {
                 color = if (totalAmount >= 0) VibrantGreen else Red500
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
             SmallFloatingActionButton(onClick = { GlobalScope.launch(Dispatchers.Main) {
                 try {
                     response = ChatData.getResponseAndAdvice(application)
@@ -623,6 +624,7 @@ fun EditItemDialog(
 ) {
     var description by remember { mutableStateOf(item.description ?: "") }
     var amount by remember { mutableStateOf(item.amount?.toString() ?: "") }
+    val amountError by remember { mutableStateOf("") }
     val isDarkTheme = isSystemInDarkTheme()
     val textColor = if (isDarkTheme) Color.White else Color.Black
     val itemTypeColor = if (item.type == "income") VibrantGreen else Red700
@@ -675,13 +677,25 @@ fun EditItemDialog(
                         focusedLabelColor = itemTypeColor,
                         leadingIconColor = itemTypeColor,
                         cursorColor = textColor
-                    )
+                    ),
+                    isError = amount.toDoubleOrNull() == null
                 )
+                if(amount.toDoubleOrNull() == null) {
+                    Text(
+                        text = "Please enter a valid number",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Red700
+                    )
+                }
             }
         },
         confirmButton = {
-            Button(onClick = {
-                val updatedItem = item.copy(description = description, amount = amount.replace(",", ".").replace("-","").replace("+","").toDoubleOrNull() ?: 0.0)
+            Button(onClick = { if (amount.toDoubleOrNull() != null) {
+                val updatedItem = item.copy(
+                    description = description,
+                    amount = amount.replace(",", ".").replace("-", "").replace("+", "")
+                        .toDoubleOrNull() ?: 0.0
+                )
                 scope.launch {
                     withContext(Dispatchers.IO) {
                         if (item.type == "income") {
@@ -693,6 +707,9 @@ fun EditItemDialog(
                     homeScreenViewModel.refreshLists()
                 }
                 onDismiss()
+            }else {
+
+            }
             },colors = ButtonDefaults.buttonColors(
                 backgroundColor = VibrantGreen,
                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -723,6 +740,7 @@ fun IncomeDialog(
     onConfirm: () -> Unit
 ) {
     val isDarkTheme = isSystemInDarkTheme()
+    val amountError by remember { mutableStateOf("") }
     val textColor = if (isDarkTheme) Color.White else Color.Black
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -776,8 +794,16 @@ fun IncomeDialog(
                         focusedLabelColor = VibrantGreen,
                         leadingIconColor = VibrantGreen,
                         cursorColor = textColor
-                    )
+                    ),
+                    isError = incomeAmount.toDoubleOrNull() == null
                 )
+                if(incomeAmount.toDoubleOrNull() == null) {
+                    Text(
+                        text = "Please enter a valid number",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Red700
+                    )
+                }
             }
         },
         confirmButton = {
@@ -862,8 +888,16 @@ fun ExpenseDialog(
                         focusedLabelColor = Red700,
                         leadingIconColor = Red700,
                         cursorColor = textColor
-                    )
+                    ),
+                    isError = expenseAmount.toDoubleOrNull() == null
                 )
+                if(expenseAmount.toDoubleOrNull() == null) {
+                    Text(
+                        text = "Please enter a valid number",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Red700
+                    )
+                }
             }
         },
         confirmButton = {
