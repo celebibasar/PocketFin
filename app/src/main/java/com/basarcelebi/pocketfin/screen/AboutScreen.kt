@@ -75,7 +75,13 @@ fun AboutScreen(
                     contentColor = MaterialTheme.colorScheme.onSurface
 
                 ),
-                shape = RoundedCornerShape(30.dp)
+                shape = RoundedCornerShape(30.dp),
+                onClick = {
+                    val url = "https://github.com/celebibasar/PocketFin"
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(url)
+                    context.startActivity(intent)
+                }
             ) {
                 Row(
                     modifier = Modifier

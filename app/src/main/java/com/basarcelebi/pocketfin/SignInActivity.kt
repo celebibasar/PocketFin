@@ -76,9 +76,8 @@ class SignInActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            // The user is already signed in, navigate to MainActivity
             startActivity(Intent(this, MainActivity::class.java))
-            finish() // finish the current activity to prevent the user from coming back to the SignInActivity using the back button
+            finish()
         }
 
         setContent {
@@ -88,8 +87,6 @@ class SignInActivity : AppCompatActivity() {
 
     @Composable
     fun SignInScreen(context: Context) {
-        val auth = FirebaseAuth.getInstance()
-
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var emailError by remember { mutableStateOf("") }

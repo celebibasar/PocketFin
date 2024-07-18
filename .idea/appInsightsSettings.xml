@@ -9,7 +9,7 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.basarcelebi.pocketfin" />
-                  <option name="mobileSdkAppId" value="1:550769959700:android:c00e466b5c2d18ed4c9801" />
+                  <option name="mobileSdkAppId" value="1:550769959700:android:6657fd8186c86f2a4c9801" />
                   <option name="projectId" value="pocketfin-f7710" />
                   <option name="projectNumber" value="550769959700" />
                 </ConnectionSetting>
