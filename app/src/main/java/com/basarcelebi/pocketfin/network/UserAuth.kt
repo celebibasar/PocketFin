@@ -7,8 +7,10 @@ class UserAuth {
 
     val user = auth.currentUser
 
-    fun logout() {
-        auth.signOut()
+    companion object {
+        fun logout() {
+            FirebaseAuth.getInstance().signOut()
+        }
     }
 
     fun isUserSignedIn(): Boolean {

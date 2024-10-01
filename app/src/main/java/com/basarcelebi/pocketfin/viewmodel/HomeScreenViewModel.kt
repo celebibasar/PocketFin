@@ -94,4 +94,12 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
             refreshLists() // Refresh lists to include the new item
         }
     }
+
+    companion object {
+        fun getUserId(): String? {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            return currentUser?.uid
+
+        }
+    }
 }

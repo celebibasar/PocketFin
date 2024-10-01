@@ -7,6 +7,6 @@ class PocketFinApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        PocketFinDatabase.getDatabase(this) // Veritabanı bağlantısını oluştur
+        PocketFinDatabase.getDatabase(this)
     }
 }
