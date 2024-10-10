@@ -2,7 +2,12 @@ package com.basarcelebi.pocketfin.screen
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -11,6 +16,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,13 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
 import com.basarcelebi.pocketfin.R
 import com.basarcelebi.pocketfin.SignInActivity
+import com.basarcelebi.pocketfin.database.User
+import com.basarcelebi.pocketfin.database.UserDao
 import com.basarcelebi.pocketfin.network.UserAuth
 import com.basarcelebi.pocketfin.network.UserAuth.Companion.logout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileScreen(auth: UserAuth = UserAuth(), navController: NavHostController) {
+fun ProfileScreen(auth: UserAuth = UserAuth(), navController: NavHostController, userDao: UserDao) {
     val poppins = FontFamily(Font(R.font.poppins))
     val isDarkTheme = isSystemInDarkTheme()
     val textColor = if (isDarkTheme) Color.White else Color.Black
@@ -54,7 +70,8 @@ fun ProfileScreen(auth: UserAuth = UserAuth(), navController: NavHostController)
         }
 
         item {
-            ProfileCard(auth)
+            // ProfileCard fonksiyonuna userDao parametresini ekleyin
+            ProfileCard(auth = auth, userDao = userDao)
         }
 
         item {
@@ -78,6 +95,7 @@ fun ProfileScreen(auth: UserAuth = UserAuth(), navController: NavHostController)
         }
     }
 }
+
 
 @Composable
 fun SettingsBox(navController: NavHostController) {
@@ -148,13 +166,61 @@ fun BoxItem(text: String, iconRes: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun ProfileCard(auth: UserAuth) {
+fun ProfileCard(auth: UserAuth, userDao: UserDao) {
     val poppins = FontFamily(Font(R.font.poppins))
     val isDarkTheme = isSystemInDarkTheme()
     val textColor = if (isDarkTheme) Color.White else Color.Black
     val user = auth.user
 
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            profileImageUri = uri
+            user?.let { currentUser ->
+                saveImageUriToDatabase(
+                    currentUser.id,
+                    uri.toString(),
+                    userDao
+                )
+            }
+        }
+    }
+
+    // Fetch the profile image URI when the user object changes
+    LaunchedEffect(user) {
+        user?.let {
+            profileImageUri = it.profileImageUrl?.let { uriString ->
+                Uri.parse(uriString).also { uri ->
+                    Log.d("ProfileCard", "Fetched profile image URI: $uri")
+                }
+            }
+        }
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        profileImageUri?.let {
+            Image(
+                painter = rememberImagePainter(it),
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape) // Circular profile image
+            )
+        } ?: run {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray) // Placeholder background
+            )
+        }
+
         Column(
             modifier = Modifier
                 .padding(start = 16.dp, bottom = 16.dp, end = 16.dp)
@@ -183,20 +249,43 @@ fun ProfileCard(auth: UserAuth) {
                 )
             }
         }
-
-        Image(
-            painter = painterResource(id = R.drawable.app_logo),
-            contentDescription = "Profile",
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-        )
     }
 }
+
+fun saveImageUriToDatabase(userId: String, imageUri: String, userDao: UserDao) {
+    // Profil resmini veritabanına kaydetmek için Room üzerinden güncelleme yapalım
+    CoroutineScope(Dispatchers.IO).launch {
+        userDao.updateProfileImage(userId, imageUri)
+    }
+}
+
+
 
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
     val navController = rememberNavController()
-    ProfileScreen(navController = navController)
+    val userDao = MockUserDao() // Use the mock implementation here
+    ProfileScreen(navController = navController, userDao = userDao)
 }
+
+class MockUserDao : UserDao {
+    override suspend fun insert(user: User) {
+        // Mock implementation
+    }
+
+    override suspend fun updateUser(user: User) {
+        // Mock implementation
+    }
+
+    override suspend fun getUser(userId: String): User? {
+        // Return a mock user for preview
+        return User(id = "1", userName = "John Doe", profileImageUrl = "http://example.com/image.jpg")
+    }
+
+    override suspend fun updateProfileImage(userId: String, profileImageUrl: String) {
+        // Mock implementation
+    }
+}
+
+

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.basarcelebi.pocketfin.network.UserAuth
 import com.basarcelebi.pocketfin.ui.theme.VibrantGreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -243,6 +244,9 @@ class SignInActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val userAuth = UserAuth()  // Create an instance of UserAuth
+                    userAuth.fetchUserData()   // Fetch user data after successful sign-in
+
                     val user = auth.currentUser
                     Toast.makeText(context, "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     navigateToMainActivity()
@@ -281,6 +285,9 @@ class SignInActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    val userAuth = UserAuth()  // Create an instance of UserAuth
+                    userAuth.fetchUserData()   // Fetch user data after successful sign-in
+
                     val user = auth.currentUser
                     Toast.makeText(this, "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
                     navigateToMainActivity()
@@ -293,6 +300,7 @@ class SignInActivity : AppCompatActivity() {
     private fun navigateToSignUp(context: Context) {
         context.startActivity(Intent(context, SignUpActivity::class.java))
     }
+
     @Composable
     fun GoogleSignInButton(onClick: () -> Unit, textColor: Color) {
         Button(
@@ -325,6 +333,7 @@ class SignInActivity : AppCompatActivity() {
             )
         }
     }
+
 
 }
 

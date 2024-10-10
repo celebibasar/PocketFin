@@ -15,8 +15,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Update
 
-
-@Database(entities = [User::class, IncomeExpenseItem::class], version = 6, exportSchema = false)
+@Database(entities = [User::class, IncomeExpenseItem::class], version = 7, exportSchema = false)
 abstract class PocketFinDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
@@ -48,8 +47,14 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(user: User)
 
+    @Update
+    suspend fun updateUser(user: User)
+
     @Query("SELECT * FROM users WHERE id = :userId")
     suspend fun getUser(userId: String): User?
+
+    @Query("UPDATE users SET profile_image_url = :profileImageUrl WHERE id = :userId")
+    suspend fun updateProfileImage(userId: String, profileImageUrl: String)
 }
 
 @Dao
@@ -98,6 +103,11 @@ data class IncomeExpenseItem(
 
 @Entity(tableName = "users")
 data class User(
-    @PrimaryKey val id: String,
-    @ColumnInfo(name = "user_name") val userName: String?
+    @PrimaryKey val id: String, // Kullanıcının benzersiz kimliği, zorunlu
+    @ColumnInfo(name = "user_name") val userName: String? = "Unknown User", // Varsayılan kullanıcı adı
+    @ColumnInfo(name = "display_name") val displayName: String? = null, // Kullanıcı için gösterilecek ad
+    @ColumnInfo(name = "email") val email: String? = null, // Kullanıcının e-mail adresi
+    @ColumnInfo(name = "profile_image_url") val profileImageUrl: String? = null // Profil resmi URL'si
 )
+
+

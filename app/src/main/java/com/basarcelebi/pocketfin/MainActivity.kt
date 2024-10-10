@@ -173,6 +173,9 @@ fun NavigationHost(
     database: PocketFinDatabase,
     scope: CoroutineScope
 ) {
+    // Get the UserDao from the database
+    val userDao = database.userDao()
+
     NavHost(navController, startDestination = Screen.Home.route, modifier = modifier) {
         composable(Screen.Home.route) {
             HomeScreen(database, scope)
@@ -181,7 +184,7 @@ fun NavigationHost(
             ChatActivity().ChatScreen(paddingValues = PaddingValues(16.dp))
         }
         composable(Screen.Profile.route) {
-            ProfileScreen(UserAuth(), navController)
+            ProfileScreen(UserAuth(), navController, userDao) // Pass userDao to ProfileScreen
         }
         composable(Screen.Account.route) {
             AccountScreen()
@@ -194,6 +197,7 @@ fun NavigationHost(
         }
     }
 }
+
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController?) {

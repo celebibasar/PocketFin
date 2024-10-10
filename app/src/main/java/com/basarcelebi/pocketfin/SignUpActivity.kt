@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.basarcelebi.pocketfin.network.UserAuth
 import com.basarcelebi.pocketfin.ui.theme.VibrantGreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -264,15 +265,31 @@ class SignUpActivity : AppCompatActivity() {
                     user?.updateProfile(profileUpdates)
                         ?.addOnCompleteListener { profileUpdateTask ->
                             if (profileUpdateTask.isSuccessful) {
-                                Toast.makeText(this, "Signed up as ${user.displayName}", Toast.LENGTH_SHORT).show()
+                                // Fetch user data after successful sign-up
+                                val userAuth = UserAuth()  // Create an instance of UserAuth
+                                userAuth.fetchUserData()   // Fetch user data
+
+                                Toast.makeText(
+                                    this,
+                                    "Signed up as ${user.displayName}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 startActivity(Intent(this, MainActivity::class.java))
                                 finish()
                             } else {
-                                Toast.makeText(this, "Profile update failed: ${profileUpdateTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this,
+                                    "Profile update failed: ${profileUpdateTask.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                 } else {
-                    Toast.makeText(this, "Sign up failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Sign up failed: ${task.exception?.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
